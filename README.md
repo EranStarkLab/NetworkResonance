@@ -19,7 +19,7 @@ framework facilitates the investigation of resonance in neuronal systems.
 
 ## Wrappers for each Figure:
 - NR_make_Fig1: 
- - Figure 1. Cycle-averaged firing rate resonance and spike timing resonance.
+  - Figure 1. Cycle-averaged firing rate resonance and spike timing resonance.
 NR_make_Fig2: Figure 2. Resonance generated at the level of membrane potential fluctuations can be inherited to the network level.
 NR_make_Fig3: Figure 3. Resonance can be generated directly at the spiking level.
 NR_make_Fig4: Figure 4. Resonance generated at the spiking level can be inherited to the network level.
