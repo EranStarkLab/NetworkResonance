@@ -365,7 +365,7 @@ set( gca, 'ytick', ticks, 'YTickLabel', Vals( ticks ) );
 [ ~, minidx ]                   = min( abs( Vals - Vcan ) );
 line( xlim, [ 1 1 ] * minidx, 'color', [ 1 1 1 ], 'linestyle', '--' );
 
-local_fig_title( tstr )
+local_fig_title( tstr );
 
 return % NR_sinusoids_to_cmodel_run
 

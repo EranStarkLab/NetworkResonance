@@ -251,6 +251,8 @@ dflag_arg                       = NaN;
 for i = 1 : length( ca )
     if isequal( lower( ca{ i } ), 'dflag' )
         dflag_arg               = ca{ i + 1 };
+        ca( i : i + 1 )         = []; 
+        varargin                = ca;
         break
     end
 end
