@@ -24,7 +24,6 @@ function NR_make_Fig5( savef, pstr, outdir, varargin )
 prefix                          = 'resonance_network';
 renderer_name                   = 'painters';
 resize                          = '-bestfit';
-color_input                     = [ 0 0 0.7 ];                              % input (current): blue
 color_output                    = [ 0 0 0 ];                                % output (Vm/spikes): black 
 colors_layers_mean          	= [ 1 0 0; 0 0 0.7 ];                       % layer 1: "PYR"; layer 2: "INT"
 colors_layers                   = [ 1 0.5 0.5; 0.7 0.7 1 ];
@@ -56,225 +55,355 @@ datadir                         = outdir;
 % ----------------------------------------------------------------------
 % (A-E) Synaptic and spiking resonance in a model of synaptic depression and facilitation 
 
-% how to run the simulations
-model                           = 'LIF_C';
-Dn                              = 0.001;                                    % [mV]
-Ibias                           = -3;
-Amp                             = 8;
-Gc_spk                          = 0.08;                                     % [mS/cm^2]
-Gc_spk0                         = 0;                                        % [mS/cm^2]
-fvals                           = 1 : 40;
-prepad                          = 0;                                        % [s]
-Tlong                           = 4;                                        % [s]
-blackOutDuration                = 1;                                        % [s]
-Gl_LIF_C                        = 0.5;
+% general parameters:
+spike_length                = 1;
+spike_width                 = 2;
+spike_color                 = [ 1 1 1 ] * 0.5;
+nmodels                     = length( synmodels_sth );
+
+Gs_LIF_syn                  = 0.175;
+Es_LIF_syn                  = 0;
+Ibias_LIF_syn               = 1.3;
+
+Tlong_sth                   = 20;
+fvals_sth                   = ( 1 : 40 );
+if length( fvals_sth ) == 2
+    sig                     = 'chirp';
+else
+    sig                     = 'sines';
+end
+
+dflag                       = 0;
+
+%---------------------------------------------------------
+% subthreshold parameters:
+
+Dn_syn                      = 0;
+Vth_LIF_syn                 = 0;
+
+%---------------------------------------------------------
+% subthreshold - examples:
 
 % what to show in the traces examples
-fvals_slct                      = [ 1 8 16 ];
-nfvals                          = length( fvals_slct );
-tlim                            = [ 1 2 ];
+fvals_slct                  = [ 1 10 40 100 ];                              % Inap - 4, 8, 16
+nfvals                      = length( fvals_slct );
+ncycles                     = 10;
+synmodel                    = 'DF';
 
-%---------------------------------------------------------------------
 % 2D firing rate map (rate vs. frequency and phase)
-[ ~, ~, ~, ~, s0 ]              = NR_sinusoids_to_cmodel( model, 'Tlong', Tlong, 'fvals', fvals ...
-    , 'Dn', Dn, 'nreps', 1, 'Amp', Amp, 'Ibias', Ibias, 'graphics', [ 0 0 0 0 ], 'nFFT', 1250 ...
-    , 'Gc_LIF_C', Gc_spk0, 'Gl_LIF_C', Gl_LIF_C ...
-    , 'prepad', prepad, 'blackOutDuration', blackOutDuration );
+fvals_all                   = [ fvals_sth( : ); fvals_slct( : ) ];
+fvals_all                   = min( fvals_all ) : max( fvals_all );
+[ ~, ~, ~, ~, s ]           = NR_sinusoids_to_cmodel( 'LIF_syn', 'Tlong', Tlong_sth, 'fvals', fvals_all ...
+    , 'Dn', Dn_syn, 'Gs_LIF_syn', Gs_LIF_syn, 'Es_LIF_syn', Es_LIF_syn ...
+    , 'nreps', 1, 'graphics', [ 0 0 0 0 ], 'synmodel_LIF_syn', synmodel ...
+    , 'Ibias', Ibias_LIF_syn, 'Vth_LIF_syn', Vth_LIF_syn ...
+    , 'dflag', dflag ...
+    );
 
-[ ~, ~, ~, ~, s ]               = NR_sinusoids_to_cmodel( model, 'Tlong', Tlong, 'fvals', fvals ...
-    , 'Dn', Dn, 'nreps', 1, 'Amp', Amp, 'Ibias', Ibias, 'graphics', [ 0 1 1 0 ], 'nFFT', 1250 ...
-    , 'Gc_LIF_C', Gc_spk, 'Gl_LIF_C', Gl_LIF_C ...
-    , 'prepad', prepad, 'blackOutDuration', blackOutDuration );
-fig8( 1 )                       = gcf;
+% Steady state EPSP
+fig9( 1 )                   = figure;
+subplot( 2, 2, 1 ) 
+ph                          = plot( s.tfvals, s.mvals, '-b' );
+cj                          = ismember( synmodels_sth, synmodel );
+set( ph, 'color', colors_synp( cj, : ), 'linewidth', 2 );
+set( gca, 'tickdir', 'out', 'box', 'off' )
+xlabel( 'Presynaptic spike rate [spks/s]' )
+ylabel( 'Steady-state EPSP [mV]' )
 
-% firing rate and coherence 
-color_nocal                     = colors_synp( ismember( synmodels_sth, 'null' ), : );
-
-fig8( 2 )                       = figure;
-subplot( 2, 2, 1 ) % firing rate
-ph                              = plot( s.fbins, s.frate_vec, '.-b', s0.fbins, s0.frate_vec, '.-r' );
-set( ph( 1 ), 'color', color_output )
-set( ph( 2 ), 'color', color_nocal )
-ylims                           = ylim;
-ylims                           = [ 0 max( ylims( : ) ) ];
-set( gca, 'tickdir', 'out', 'box', 'off', 'ylim', ylims )
-ylabel( 'Firing rate [spks/s]' )
-
-subplot( 2, 2, 3 ) % coherence
-ph                              = plot( s.fo( s.fidx ), s.cohs( s.fidx ), '.-k', s0.fo( s.fidx ), s0.cohs( s.fidx ), '.-r' );
-set( ph( 1 ), 'color', color_output )
-set( ph( 2 ), 'color', color_nocal )
-ylims                           = ylim;
-ylims                           = [ 0 max( ylims( : ) ) ];
-set( gca, 'tickdir', 'out', 'box', 'off', 'ylim', ylims )
-ylabel( 'Coherence' )
-xlabel( 'Frequency [Hz]' )
-
-% add a few selected examples
-tidx                            = s.t >= tlim( 1 ) & s.t <= tlim( 2 );
-t                               = s.t( tidx ) - tlim( 1 );
-ylims                           = NaN( nfvals, 2 );
-for j                           = 1 : nfvals
-    f                           = fvals_slct( j );
-    [ ~, fidx ]                 = min( abs( s.zfvals - f ) );
-    y                           = s.Vmat( tidx, fidx );
-    subplot( nfvals, 2, 2 * ( j - 1 ) + 2 )
-    ph                          = plot( t * 1000, y, 'b' );
-    set( ph, 'color', color_output, 'linewidth', 2 );
+% plot a few selected examples
+fig9( 2 )                   = figure;
+ylims                       = NaN( nfvals, 2 );
+xlimsec                     = [ -0.01 0.03 ];
+for j                       = 1 : nfvals
+    f                       = fvals_slct( j );
+    [ ~, fidx ]             = min( abs( s.zfvals - f ) );
+    
+    subplot( nfvals, 2, 2 * ( j - 1 ) + 1 )
+    tlim                    = [ 0 ncycles / f ];
+    tidx                    = s.t >= tlim(1) & s.t <= tlim(2);
+    t                       = s.t( tidx );
+    y                       = s.Vmat( tidx, fidx );
+    ph                      = plot( t, y, 'b' );
+    set( ph, 'color', color_output );
     axis tight
     xlim( [ 0 max( xlim ) ] )
-    ylims( j, : )               = ylim;
-    title( sprintf( '%0.3g \\muA/cm^2; %0.3g Hz', Amp, f ) )
+    ylims( j, : )           = ylim;
+    title( sprintf( '%0.3g Hz', f ) )
+    ylabel( 'V [mV]' )
+    if j == nfvals
+        xlabel( 'Time [s]' )
+    end
 
-    hold on
-    y0                          = s0.Vmat( tidx, fidx );
-    ph                          = plot( t * 1000, y0, '-r' );
-    set( ph, 'color', color_nocal );
-    
+    subplot( nfvals, 2, 2 * ( j - 1 ) + 2 )
+    st                      = find( s.mat_in( :, fidx ) );
+    t0                      = s.t( st( ncycles ) );
+    tlim                    = t0 + xlimsec;
+    tidx                    = s.t >= tlim(1) & s.t <= tlim(2);
+    t                       = s.t( tidx ) - t0;
+    y                       = s.Vmat( tidx, fidx );
+    ph                      = plot( t * 1000, y, 'b' );
+    set( ph, 'color', color_output );
+    axis tight
+    title( sprintf( '%0.3g Hz', f ) )
     ylabel( 'V [mV]' )
     if j == nfvals
         xlabel( 'Time [ms]' )
     end
+    
 end
-ylims                           = [ min( ylims( :, 1 ) ) max( ylims( :, 2 ) ) ] + [ -1 1 ] * 0.1;
-for j                           = 1 : nfvals
-    subplot( nfvals, 2, 2 * ( j - 1 ) + 2 )
+ylims                       = [ min( ylims( :, 1 ) ) max( ylims( :, 2 ) ) ] + [ -0.1 0.5 ];
+for j                       = 1 : nfvals
+    subplot( nfvals, 2, 2 * ( j - 1 ) + 1 )
+    f                       = fvals_slct( j );
+    [ ~, fidx ]             = min( abs( s.zfvals - f ) );
+    tlim                    = [ 0 ncycles / f ];
+    tidx                    = s.t >= tlim(1) & s.t <= tlim(2);
+    st                      = s.mat_in( tidx, fidx );
+    plot_raster( { s.t( find( st ) ) }, [], ylims( 1 ) - 0.5, spike_length, spike_width, spike_color );
     set( gca, 'tickdir', 'out', 'box', 'off', 'ylim', ylims + [ -1 0 ] )
-    f                           = fvals_slct( j );
-    [ ~, fidx ]                 = min( abs( s.zfvals - f ) );
-    x                           = s.Iemat( tidx, fidx );
-    hold on
-    ph                          = plot( t * 1000, local_scale( x,'linear' ) * 10 + ylims( 1 ) + 1, 'b' );
-    set( ph, 'color', color_input );
+    
+    subplot( nfvals, 2, 2 * ( j - 1 ) + 2 )
+    st                      = find( s.mat_in( :, fidx ) );
+    t0                      = s.t( st( ncycles ) );
+    tlim                    = t0 + xlimsec;
+    tidx                    = s.t >= tlim(1) & s.t <= tlim(2);
+    
+    st                      = s.mat_in( tidx, fidx );
+    str                     = ( s.t( find( st ) ) + xlimsec( 1 ) ) * 1000;      % [ms]
+    plot_raster( { str }, [], ylims( 1 ) - 0.5, spike_length, spike_width, spike_color );
+    set( gca, 'tickdir', 'out', 'box', 'off', 'ylim', ylims + [ -1 0 ] )
+    xlim( xlimsec * 1000 )
+    
 end
 
-%---------------------------------------------------------------------
-% 2D plots with Gc levels
-Gl_LIF_C                        = 0.5; 
-El_LIF_C                        = -60; 
-Vreset_LIF_C                    = -70;
-sig                             = 'sines';
-[ ~, ~, ~, figs ]               = NR_sinusoids_to_cmodel_run( model, sig, 'Gc' ...
-    , 'Gl', Gl_LIF_C, 'El', El_LIF_C, 'Vr', Vreset_LIF_C, 'Gc', 0.08, 'Dn', Dn ...
-    , 'nFFT', 1250 );
-fig8( 3 )                       = figs;
+%---------------------------------------------------------
+% subthreshold - 4 models:
+clear s
+for j                       = 1 : nmodels
+    [ ~, ~, ~, ~, sj ]      = NR_sinusoids_to_cmodel( 'LIF_syn', 'Tlong', Tlong_sth, 'fvals', fvals_sth ...
+        , 'Dn', Dn_syn, 'Gs_LIF_syn', Gs_LIF_syn, 'Es_LIF_syn', Es_LIF_syn ...
+        , 'nreps', 1, 'graphics', [ 0 0 0 0 ], 'synmodel_LIF_syn', synmodels_sth{ j } ...
+        , 'Ibias', Ibias_LIF_syn, 'Vth_LIF_syn', Vth_LIF_syn ...
+        , 'dflag', dflag ...
+        );
+    s( j ) = sj;
+end
+fvals                       = s( 1 ).tfvals;
+mvals                       = NaN( length( fvals ), nmodels );
+for j                       = 1 : nmodels
+    mvals( :, j )           = s( j ).mvals;
+end
 
-%---------------------------------------------------------------------
-% subthreshold (impedance) profiles
-Gl_LIF_C                        = 0.5;
-[ ~, ~, ~, ~, s0 ]              = NR_sinusoids_to_cmodel( model, 'Tlong', Tlong, 'fvals', fvals ...
-    , 'Dn', Dn, 'nreps', 1, 'Amp', Amp, 'Ibias', Ibias, 'graphics', [ 0 0 0 0 ], 'nFFT', 1250 ...
-    , 'Gc_LIF_C', Gc_spk0, 'Vth_LIF_C', 0, 'Gl_LIF_C', Gl_LIF_C ...
-    , 'prepad', prepad, 'blackOutDuration', blackOutDuration );
+% plot
+fig9( 3 )                	= figure;
 
+subplot( 2, 2, 1 )
+ph                        	= plot( fvals, mvals );
+xlabel( 'Input rate [spikes/s]' )
+ylabel( 'Steady-state EPSP [mV]' )
+for j                     	= 1 : nmodels
+    synmodel              	= synmodels_sth{ j };
+    cj                     	= ismember( synmodels_sth, synmodel );
+    set( ph( j ), 'color', colors_synp( cj, : ), 'linewidth', 2 );
+end
+legend( ph, synmodels_sth, 'Location', 'best' );
+set( gca, 'tickdir', 'out', 'box', 'off', 'FontSize', 12 );
+limx(1)                     = min (fvals );
+limx(2)                     = max (fvals );
+xlim([limx(1) limx(2)])
+title( sprintf( '%s; T=%0.2g s, D=%0.2g; Gs=%0.2g; Es=%0.2g', sig, Tlong_sth, Dn_syn, Gs_LIF_syn, Es_LIF_syn ) )
 
-[ ~, ~, ~, ~, s1 ]              = NR_sinusoids_to_cmodel( model, 'Tlong', Tlong, 'fvals', fvals ...
-    , 'Dn', Dn, 'nreps', 1, 'Amp', Amp, 'Ibias', Ibias, 'graphics', [ 0 0 0 0 ], 'nFFT', 1250 ...
-    , 'Gc_LIF_C', Gc_spk, 'Vth_LIF_C', 0, 'Gl_LIF_C', Gl_LIF_C ...
-    , 'prepad', prepad, 'blackOutDuration', blackOutDuration );
+subplot( 2, 2, 2 )
+ph                       	= plot( fvals, local_scale( mvals,'linear' ) );
+xlabel( 'Input rate [spikes/s]' )
+ylabel( 'Steady-state EPSP (scaled)' )
+for j                     	= 1 : nmodels
+    synmodel             	= synmodels_sth{ j };
+    cj                      = ismember( synmodels_sth, synmodel );
+    set( ph( j ), 'color', colors_synp( cj, : ), 'linewidth', 2 );
+end    
+legend( ph, synmodels_sth, 'Location', 'best' );
+set( gca, 'tickdir', 'out', 'box', 'off', 'FontSize', 12 );
+limx(1)                     = min (fvals );
+limx(2)                     = max (fvals );
+xlim([limx(1) limx(2)])
+title( sprintf( '%s; T=%0.2g s, D=%0.2g; Gs=%0.2g; Es=%0.2g', sig, Tlong_sth, Dn_syn, Gs_LIF_syn, Es_LIF_syn ) )
 
-fig8( 4 )                       = figure;
+%---------------------------------------------------------
+% spiking parameters:
 
-for i                           = 1 : 2
+Dn_syn                      = 0.05;
+Vth_LIF_syn                 = -50;
+
+%---------------------------------------------------------
+% spiking example:
+
+% what to show in the traces examples
+fvals_slct                  = [ 1 10 20 40 ];                        	% Inap - 4, 8, 16
+nfvals                      = length( fvals_slct );
+ncycles                     = 10;
+synmodel                    = 'DF';
+
+% 2D firing rate map (rate vs. frequency and phase)
+fvals_all                   = [ fvals_sth( : ); fvals_slct( : ) ];
+fvals_all                   = min( fvals_all ) : max( fvals_all );
+[ ~, ~, ~, ~, s ]      = NR_sinusoids_to_cmodel( 'LIF_syn', 'Tlong', Tlong_sth, 'fvals', fvals_all ...
+    , 'Dn', Dn_syn, 'Gs_LIF_syn', Gs_LIF_syn, 'Es_LIF_syn', Es_LIF_syn ...
+    , 'nreps', 1, 'graphics', [ 0 1 0 0 ], 'synmodel_LIF_syn', synmodel ...
+    , 'Ibias', Ibias_LIF_syn, 'Vth_LIF_syn', Vth_LIF_syn ...
+    , 'dflag', dflag ...
+    );
+
+fig9( 4 )                   = gcf;
+
+% firing rate and coherence
+fig9( 5 )                   = figure;
+subplot( 2, 2, 1 ) % firing rate
+ph                          = plot( s.fbins, s.frate_vec, '.-b' );
+set( ph, 'color', color_output )
+ylims                       = ylim;
+ylims                       = [ 0 max( ylims( : ) ) ];
+set( gca, 'tickdir', 'out', 'box', 'off', 'ylim', ylims )
+ylabel( 'Firing rate [spks/s]' )
+
+subplot( 2, 2, 3 ) % coherence
+ph                          = plot( s.fo( s.fidx ), s.cohs( s.fidx ), '.-k' );
+set( ph, 'color', color_output )
+ylims                       = ylim;
+ylims                       = [ 0 max( ylims( : ) ) ];
+set( gca, 'tickdir', 'out', 'box', 'off', 'ylim', ylims )
+ylabel( 'Coherence' )
+xlabel( 'Frequency [Hz]' )
+
+ylims                       = NaN( nfvals, 2 );
+for j                       = 1 : nfvals
+    f                       = fvals_slct( j );
+    [ ~, fidx ]             = min( abs( s.zfvals - f ) );
     
-    switch i
-        case 1
-            s                   = s1;
-            acolor              = color_output;
-            astyle              = '-';
-        case 2
-            s                   = s0;
-            acolor              = color_nocal;
-            astyle              = '--';
+    subplot( nfvals, 2, 2 * ( j - 1 ) + 2 )
+    tlim                    = [ 0 ncycles / f ];
+    tidx                    = s.t >= tlim(1) & s.t <= tlim(2);
+    t                       = s.t( tidx );
+    y                       = s.Vmat( tidx, fidx );
+    ph                      = plot( t, y, 'b' );
+    set( ph, 'color', color_output );
+    axis tight
+    xlim( [ 0 max( xlim ) ] )
+    ylims( j, : )           = ylim;
+    title( sprintf( '%0.3g Hz', f ) )
+    ylabel( 'V [mV]' )
+    if j == nfvals
+        xlabel( 'Time [s]' )
     end
-    fin                         = s.zfvals;
-    Z                           = s.z;
-    Phi                         = s.zphs;
-    
-    subplot( 2, 2, 1 )
-    hold on
-    ph                          = plot( fin, Z );                           % MOhm * mm^2
-    set( ph, 'color', acolor, 'linewidth', 2, 'linestyle', astyle );
-    xlim( [ 0 40 ] )
-    set( gca, 'tickdir', 'out', 'box', 'off' )
-    ylabel( 'Impedance [M\Omega*mm^2]' )
-    axis square
-    set( gca, 'xtick', 0 : 10 : 40 )
-    
-    subplot( 2, 2, 3 )
-    hold on
-    Phi( isnan( Z ) )           = NaN;
-    uwp                         = unwrap( Phi );
-    if max( uwp ) > 2 * pi
-        uwp                     = uwp - 2 * pi;
-    end
-    ph                          = plot( fin, uwp );
-    set( ph, 'color', acolor, 'linewidth', 2, 'linestyle', astyle );
-    xlim( [ 0 40 ] )
-    ylim( [ -1 1 ] * pi/2 * 1.1 )
-    line( xlim, [ 0 0 ], 'color', [ 0 0 0 ], 'linestyle', '--' )
-    line( xlim, [ 1 1 ] * pi/2, 'color', [ 0 0 0 ], 'linestyle', '--' )
-    line( xlim, [ 1 1 ] * -pi/2, 'color', [ 0 0 0 ], 'linestyle', '--' )
-    set( gca, 'tickdir', 'out', 'box', 'off' )
-    set( gca, 'ytick', ( -1 : 0.25 : 1 ) * pi / 2, 'yticklabel', round( ( -1 : 0.25 : 1 ) * pi / 2 * 100 ) / 100 )
-    xlabel( 'Frequency [Hz]' )
-    ylabel( 'Phase [rad]' )
-    axis square
-    set( gca, 'xtick', 0 : 10 : 40 )
-    
-    % add a few selected examples
-    tidx                        = s.t >= tlim( 1 ) & s.t <= tlim( 2 );
-    t                           = s.t( tidx ) - tlim( 1 );
-    ylims                       = NaN( nfvals, 2 );
-    for j                       = 1 : nfvals
-        f                       = fvals_slct( j );
-        [ ~, fidx ]             = min( abs( s.zfvals - f ) );
-        y                       = s.Vmat( tidx, fidx );
-        subplot( nfvals, 2, 2 * ( j - 1 ) + 2 )
-        hold on
-        ph                      = plot( t * 1000, y, 'b' );
-        set( ph, 'color', acolor, 'linestyle', astyle );
-        
-        axis tight
-        xlim( [ 0 max( xlim ) ] )
-        ylims( j, : )           = ylim;
-        title( sprintf( '%0.3g \\muA/cm^2; %0.3g Hz', Amp, f ) )
-        ylabel( 'V [mV]' )
-        if j == nfvals
-            xlabel( 'Time [ms]' )
-        end
-    end
-    ylims                       = [ min( ylims( :, 1 ) ) max( ylims( :, 2 ) ) ] + [ -1 1 ] * 0.1;
-    for j                       = 1 : nfvals
-        subplot( nfvals, 2, 2 * ( j - 1 ) + 2 )
-        set( gca, 'tickdir', 'out', 'box', 'off', 'ylim', ylims + [ -1 0 ] )
-        f                       = fvals_slct( j );
-        [ ~, fidx ]             = min( abs( s.zfvals - f ) );
-        x                       = s.Iemat( tidx, fidx );
-        ph                      = plot( t * 1000, local_scale( x,'linear' ) / 2 + ylims( 1 ) - 0.75, 'b' );
-        set( ph, 'color', color_input );
-    end
-    
-end % s1, s0
+
+end
+
+ylims                       = [ min( ylims( :, 1 ) ) max( ylims( :, 2 ) ) ] + [ -0.1 0.5 ];
+
+for j                       = 1 : nfvals
+    subplot( nfvals, 2, 2 * ( j - 1 ) + 2 )
+    f                       = fvals_slct( j );
+    [ ~, fidx ]             = min( abs( s.zfvals - f ) );
+    tlim                    = [ 0 ncycles / f ];
+    tidx                    = s.t >= tlim(1) & s.t <= tlim(2);
+    st                      = s.mat_in( tidx, fidx );
+    plot_raster( { s.t( find( st ) ) }, [], ylims( 1 ) + diff( ylims ) / 4, diff( ylims ) / 2, spike_width, spike_color );
+    set( gca, 'tickdir', 'out', 'box', 'off', 'ylim', ylims + [ -1 0 ] )
+end
+
+%---------------------------------------------------------
+% spiking - 4 models:
+clear s
+for j                       = 1 : nmodels
+    [ ~, ~, ~, ~, sj ]      = NR_sinusoids_to_cmodel( 'LIF_syn', 'Tlong', Tlong_sth, 'fvals', fvals_sth ...
+        , 'Dn', Dn_syn, 'Gs_LIF_syn', Gs_LIF_syn, 'Es_LIF_syn', Es_LIF_syn ...
+        , 'nreps', 1, 'graphics', [ 0 0 0 0 ], 'synmodel_LIF_syn', synmodels_sth{ j } ...
+        , 'Ibias', Ibias_LIF_syn, 'Vth_LIF_syn', Vth_LIF_syn ...
+        , 'dflag', dflag ...
+        );
+    s( j ) = sj;
+end
+fidx                        = s( 1 ).fidx;
+fvals                       = s( 1 ).fo;
+cohs                        = NaN( length( fvals ), nmodels );
+phs                         = NaN( length( fvals ), nmodels );
+for j                       = 1 : nmodels
+    cohs( :, j )            = s( j ).cohs;
+    phs( :, j )             = s( j ).phs;
+end
+
+% plot
+fig9( 6 )                	= figure;
+
+subplot( 2, 2, 1 )
+ph                        	= plot( fvals, cohs );
+xlabel( 'Input rate [spikes/s]' )
+ylabel( 'Coherence' )
+for j                     	= 1 : nmodels
+    synmodel              	= synmodels_sth{ j };
+    cj                     	= ismember( synmodels_sth, synmodel );
+    set( ph( j ), 'color', colors_synp( cj, : ), 'linewidth', 2 );
+end
+legend( ph, synmodels_sth, 'Location', 'best' );
+set( gca, 'tickdir', 'out', 'box', 'off', 'FontSize', 12 );
+limx(1)                     = min (fvals(fidx) );
+limx(2)                     = max (fvals(fidx) );
+xlim([limx(1) limx(2)])
+title( sprintf( '%s; T=%0.2g s, D=%0.2g; Gs=%0.2g; Es=%0.2g', sig, Tlong_sth, Dn_syn, Gs_LIF_syn, Es_LIF_syn ) )
+
+subplot( 2, 2, 2 )
+ph                       	= plot( fvals, local_scale( cohs,'linear' ) );
+xlabel( 'Input rate [spikes/s]' )
+ylabel( 'Coherence (scaled)' )
+for j                     	= 1 : nmodels
+    synmodel             	= synmodels_sth{ j };
+    cj                      = ismember( synmodels_sth, synmodel );
+    set( ph( j ), 'color', colors_synp( cj, : ), 'linewidth', 2 );
+end    
+legend( ph, synmodels_sth, 'Location', 'best' );
+set( gca, 'tickdir', 'out', 'box', 'off', 'FontSize', 12 );
+limx(1)                     = min (fvals(fidx) );
+limx(2)                     = max (fvals(fidx) );
+xlim([limx(1) limx(2)])
+title( sprintf( '%s; T=%0.2g s, D=%0.2g; Gs=%0.2g; Es=%0.2g', sig, Tlong_sth, Dn_syn, Gs_LIF_syn, Es_LIF_syn ) )
+
+subplot( 2, 2, 3 )
+uwphs                       = unwrap( phs );
+ph                        	= plot( fvals, uwphs );
+limx(1)                     = min (fvals(fidx) );
+limx(2)                     = max (fvals(fidx) );
+xlim([limx(1) limx(2)])
+xlabel( 'Input rate [spikes/s]' )
+ylabel( 'Phase [rad]' )
+for j                     	= 1 : nmodels
+    synmodel              	= synmodels_sth{ j };
+    cj                     	= ismember( synmodels_sth, synmodel );
+    set( ph( j ), 'color', colors_synp( cj, : ), 'linewidth', 2 );
+end
+local_alines( 0, 'y', 'color', [ 0 0 0 ], 'linestyle', '--' );
+ylim( [ -pi pi ] )
+legend( ph, synmodels_sth, 'Location', 'best' );
+set( gca, 'tickdir', 'out', 'box', 'off', 'FontSize', 12 );
+title( sprintf( '%s; T=%0.2g s, D=%0.2g; Gs=%0.2g; Es=%0.2g', sig, Tlong_sth, Dn_syn, Gs_LIF_syn, Es_LIF_syn ) )
 
 %-----
-fig                             = fig8;
+fig                         = fig9( fig9 ~= 0 );
 if savef
-    for i                       = 1 : length( fig )
-        figname = [ outdir filesep prefix '_FIG5A-E_part' num2str( i ) ];
+    for i                   = 1 : length( fig )
+        figname                 = [ outdir filesep prefix '_FIG5A-E_part' num2str( i ) ];
         figure( fig( i ) );
-        figi                    = gcf;
-        figi.Renderer           = renderer_name;
+        figi              	= gcf;
+        figi.Renderer      	= renderer_name;
         pause( 0.2 )
         if isequal( pstr, '-dpdf' )
-            rsz                 = resize;
+            rsz          	= resize;
         else
-            rsz                 = '';
+            rsz          	= '';
         end
         print( figi, pstr, figname, rsz )
     end
 end
-
+    
 % ----------------------------------------------------------------------
 % (H-I) Network resonance in a model of synaptic plasticity
 % ----------------------------------------------------------------------
