@@ -40,6 +40,8 @@ framework facilitates the investigation of resonance in neuronal systems.
   - coherence between spike trains and analog signal.
 - st_fingerprint:                   
   - firing rate map (frequency-phase) for spike trains and analog signal.
+- NR_calc_z_spectral                          
+  - impedance and phase in the frequency domain (any input)
 - NR_st_coherence_demo:             
   - demonstrate the difference between coherence and firing rate metrics
 - NR_sinusoids_to_cmodel:           
@@ -58,8 +60,6 @@ framework facilitates the investigation of resonance in neuronal systems.
   - synaptic transmission simulation (LIF/HH model)
 
 ## Utilities
-- NR_calc_z_spectral                          
-  - impedance and phase in the frequency domain (any input)
 - inranges                          
   - determine which elements of a vector are in which range
 - myjet                             
