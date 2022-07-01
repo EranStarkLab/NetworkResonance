@@ -278,6 +278,12 @@ if reCompute
     end
     finput                  = finput_i;
     save( filename, 'st', 'finput', 't', 'nreps', 'Iapp', 'Ain', 'D_i' );
+    L.st                    = st;
+    L.finput                = finput;
+    L.nreps                 = nreps;
+    L.Iapp                  = Iapp;
+    L.Ain                   = Ain;
+    L.D_i                   = D_i;
 end
 
 % parameters for coherence and firing rate calculations:
