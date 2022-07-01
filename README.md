@@ -36,25 +36,41 @@ framework facilitates the investigation of resonance in neuronal systems.
   - Figure 8. Inhibition-induced network resonance is sharpened by presynaptic high-pass filtering.
 
 ## Analysis
-st_coherence:                     coherence between spike trains and analog signal.
-st_fingerprint:                   firing rate map (frequency-phase) for spike trains and analog signal.
-NR_st_coherence_demo:             demonstrate the difference between coherence and firing rate metrics
-NR_sinusoids_to_cmodel:           sinusoid input to single cell/network models
-NR_sinusoids_to_cmodel_run:       wrapper for sinusoids_to_cmodel
-NR_sinusoids_to_cmodel_images:    plot two matrices
+- st_coherence:                     
+  - coherence between spike trains and analog signal.
+- st_fingerprint:                   
+  - firing rate map (frequency-phase) for spike trains and analog signal.
+- NR_st_coherence_demo:             
+  - demonstrate the difference between coherence and firing rate metrics
+- NR_sinusoids_to_cmodel:           
+  - sinusoid input to single cell/network models
+- NR_sinusoids_to_cmodel_run:      
+  - wrapper for sinusoids_to_cmodel
+- NR_sinusoids_to_cmodel_images:    
+  - plot two matrices
 
 ## Simulations
-NR_einet                          network of E and I cells: LIF/Inap, all-to-all chemical connectivity
-NR_eisim                          an E-cell and an I-cell that receives input to one of the cells
-NR_syntransmit                    synaptic transmission simulation (LIF/HH model)
+- NR_einet                          
+  - network of E and I cells: LIF/Inap, all-to-all chemical connectivity
+- NR_eisim                          
+  - an E-cell and an I-cell that receives input to one of the cells
+- NR_syntransmit                    
+  - synaptic transmission simulation (LIF/HH model)
 
 ## Utilities
-inranges                          determine which elements of a vector are in which range
-myjet                             modified jet with extreme values in pure R,B
-ParseArgPairs                     flexible argument assigning
-plot_raster                       raster display for spike trains
-plotOneSpectrogram                plot a spectrogram/phasogram
-plotTraces                        in a matrix
-sortranges                        to be a set of non-overlapping [ small large ] pairs
+- inranges                          
+  - determine which elements of a vector are in which range
+- myjet                             
+  - modified jet with extreme values in pure R,B
+- ParseArgPairs                    
+  - flexible argument assigning
+- plot_raster                       
+  - raster display for spike trains
+- plotOneSpectrogram               
+  - plot a spectrogram/phasogram
+- plotTraces                       
+  - in a matrix
+- sortranges                       
+  - to be a set of non-overlapping [ small large ] pairs
 
  
