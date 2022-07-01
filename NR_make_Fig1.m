@@ -19,7 +19,7 @@
 function NR_make_Fig1( savef, pstr, outdir)
 
 % constants
-prefix                          = 'NR';
+prefix                          = 'resonance_network';
 renderer_name                   = 'painters';
 resize                          = '-bestfit';
 color_input                     = [ 0 0 0.7 ];                              % input (current): blue

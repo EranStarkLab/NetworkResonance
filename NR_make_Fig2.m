@@ -388,28 +388,26 @@ end
 %--------------------------------------------------------------------
 % 2D plots with Noise, Amp, and Ibias levels
 sig                         = 'sines';
-gmode                       = { 'imagesc' };
 [ ~, ~, ~, figs ]           = NR_sinusoids_to_cmodel_run( model, sig, 'Dn' ...
-    , 'savedata', 1, 'savefig', 1, 'gmode', gmode, 'nFFT', 1250, 'dflag', 0 );
+    ,'nFFT', 1250, 'dflag', 0 );
 fig4( 3 )                   = figs;
 [ ~, ~, ~, figs ]           = NR_sinusoids_to_cmodel_run( model, sig, 'Amp' ...
-    , 'savedata', 1, 'savefig', 1, 'gmode', gmode, 'nFFT', 1250, 'dflag', 0 );
+    , 'nFFT', 1250, 'dflag', 0 );
 fig4( 4 )                   = figs;
 [ ~, ~, ~, figs ]           = NR_sinusoids_to_cmodel_run( model, sig, 'Ibias' ...
-    , 'savedata', 1, 'savefig', 1, 'gmode', gmode, 'nFFT', 1250, 'dflag', 0 );
+    , 'nFFT', 1250, 'dflag', 0 );
 fig4( 5 )                   = figs;
 
 %--------------------------------------------------------------------
 % check noise:
 dn_vals                     = 0 : 0.005 : 2; % extended range
-gmode                       = { 'imagesc', 'imagescbar' };
 [ ~, ~, ~, afig ...
-    , ~ ] = NR_sinusoids_to_cmodel_run( model, sig, 'Dn', 'savedata', 1, 'savefig', 1, 'gmode', gmode, 'nFFT', 1250, 'param_vals', dn_vals, 'dflag', 0 );
+    , ~ ] = NR_sinusoids_to_cmodel_run( model, sig, 'Dn',  'nFFT', 1250, 'param_vals', dn_vals, 'dflag', 0 );
 fig4( 6 : 7 )               = afig;
 
 amp_vals                    = 0 : 0.005 : 1; % extended range
 [ ~, ~, ~ ...
-    , afig, ~ ]         = NR_sinusoids_to_cmodel_run( model, sig, 'Amp', 'savedata', 1, 'savefig', 1, 'gmode', gmode, 'nFFT', 1250, 'param_vals', amp_vals, 'dflag', 0 );
+    , afig, ~ ]         = NR_sinusoids_to_cmodel_run( model, sig, 'Amp', 'nFFT', 1250, 'param_vals', amp_vals, 'dflag', 0 );
 fig4( 8 : 9 )               = afig;
 
 %-----

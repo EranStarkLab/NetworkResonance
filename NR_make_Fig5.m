@@ -160,10 +160,9 @@ Gl_LIF_C                    = 0.5;
 El_LIF_C                    = -60; 
 Vreset_LIF_C                = -70;
 sig                         = 'sines';
-gmode                       = { 'imagesc' };
 [ ~, ~, ~, figs ]           = NR_sinusoids_to_cmodel_run( model, sig, 'Gc' ...
     , 'Gl', Gl_LIF_C, 'El', El_LIF_C, 'Vr', Vreset_LIF_C, 'Gc', 0.08, 'Dn', Dn ...
-    , 'savedata', 1, 'savefig', 1, 'gmode', gmode, 'nFFT', 1250 );
+    , 'nFFT', 1250 );
 fig8( 3 )                   = figs;
 
 %---------------------------------------------------------------------

@@ -233,15 +233,11 @@ end
 %---------------------------------------------------------
 % 2D plots with Noise, Amp, and Ibias levels
 sig                         = 'sines';
-gmode                       = { 'imagesc' };
-[ ~, ~, ~, figs ]           = NR_sinusoids_to_cmodel_run( model, sig, 'Dn' ...
-    , 'savedata', 1, 'savefig', 1, 'gmode', gmode, 'nFFT', 1250, 'dflag', dflag );
+[ ~, ~, ~, figs ]           = NR_sinusoids_to_cmodel_run( model, sig, 'Dn', 'nFFT', 1250, 'dflag', dflag );
 fig6( 3 )                   = figs;
-[ ~, ~, ~, figs ]           = NR_sinusoids_to_cmodel_run( model, sig, 'Amp' ...
-    , 'savedata', 1, 'savefig', 1, 'gmode', gmode, 'nFFT', 1250, 'dflag', dflag );
+[ ~, ~, ~, figs ]           = NR_sinusoids_to_cmodel_run( model, sig, 'Amp', 'nFFT', 1250, 'dflag', dflag );
 fig6( 4 )                   = figs;
-[ ~, ~, ~, figs ]           = NR_sinusoids_to_cmodel_run( model, sig, 'Ibias' ...
-    , 'savedata', 1, 'savefig', 1, 'gmode', gmode, 'nFFT', 1250, 'dflag', dflag );
+[ ~, ~, ~, figs ]           = NR_sinusoids_to_cmodel_run( model, sig, 'Ibias', 'nFFT', 1250, 'dflag', dflag );
 fig6( 5 )                   = figs;
 
 %---------------------------------------------------------
@@ -323,11 +319,9 @@ end
 %---------------------------------------------------------
 % 2D plots with extended Amp range
 sig                         = 'sines';
-gmode                       = { 'imagesc' };
-%amp_vals                    = 0.085 : 0.0025 : 0.3;
 amp_vals                    = 0 : 0.0025 : 0.3; % extended range
 [ ~, ~, ~ ...
-    , afig, ~ ]             = NR_sinusoids_to_cmodel_run( model, sig, 'Amp', 'savedata', 1, 'savefig', 1, 'gmode', gmode, 'nFFT', 1250 ...
+    , afig, ~ ]             = NR_sinusoids_to_cmodel_run( model, sig, 'Amp','nFFT', 1250 ...
     , 'param_vals', amp_vals, 'dflag', dflag );
 fig6( 7 )                   = afig;
 
@@ -454,10 +448,9 @@ Gl_LIF_C                    = 0.5;
 El_LIF_C                    = -60; 
 Vreset_LIF_C                = -70;
 sig                         = 'sines';
-gmode                       = { 'imagesc' };
 [ ~, ~, ~, figs ]           = NR_sinusoids_to_cmodel_run( model, sig, 'Gc' ...
     , 'Gl', Gl_LIF_C, 'El', El_LIF_C, 'Vr', Vreset_LIF_C, 'Gc', 0.08, 'Dn', Dn ...
-    , 'savedata', 1, 'savefig', 1, 'gmode', gmode, 'nFFT', 1250 );
+    , 'nFFT', 1250 );
 fig8( 3 )                   = figs;
 
 %---------------------------------------------------------------------

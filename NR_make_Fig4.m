@@ -192,13 +192,13 @@ for i                       = 1 : nfigs
     stvec                   = find( sei.sr( :, eidx ) );
     st_fingerprint( stvec, Ievec, 'spkFs', Fs_stfp, 'xFs', Fs_stfp ...
         , 'fROI', fROI_stfp, 'Fs', aFs_stfp, 'graphics', 1, 'M', M_stfp, 'nFFT', nFFT_stfp );
-    sgtitle( sprintf( 'E; Amp E/I: %0.3g/%0.3g; Dn E/I: %0.3g/%0.3g mV', Amp_e, Amp_i, Dn_e, Dn_i ) )
+    local_fig_title( sprintf( 'E; Amp E/I: %0.3g/%0.3g; Dn E/I: %0.3g/%0.3g mV', Amp_e, Amp_i, Dn_e, Dn_i ) )
     fig7E( i )              = gcf;
 
     stvec                   = find( sei.sr( :, iidx ) );
     st_fingerprint( stvec, Ievec, 'spkFs', Fs_stfp, 'xFs', Fs_stfp ...
         , 'fROI', fROI_stfp, 'Fs', aFs_stfp, 'graphics', 1, 'M', M_stfp, 'nFFT', nFFT_stfp );
-    sgtitle( sprintf( 'I; Amp E/I: %0.3g/%0.3g; Dn E/I: %0.3g/%0.3g mV', Amp_e, Amp_i, Dn_e, Dn_i ) )
+    local_fig_title( sprintf( 'I; Amp E/I: %0.3g/%0.3g; Dn E/I: %0.3g/%0.3g mV', Amp_e, Amp_i, Dn_e, Dn_i ) )
     fig7I( i )              = gcf;
     
     
@@ -649,5 +649,29 @@ ah                          = [ ah1 ah2 ];
 hh                          = [ h1 h2 ];
 
 return %local_imagescbar
+
+%------------------------------------------------------------------------
+% th = local_fig_title( tstr )
+% title for the figure
+%------------------------------------------------------------------------
+function th = local_fig_title( tstr )
+
+idx                             = strfind( tstr, '_' ); 
+idx                             = [ idx length( tstr ) + 1 ];
+str                             = tstr( 1 : idx( 1 ) - 1 );
+for i                           = 1 : ( length( idx ) - 1 )
+    str                         = sprintf( '%s%s%s', str, '\_' ...
+        , tstr( ( idx( i ) + 1 ) : ( idx( i + 1 ) - 1 ) ) ); 
+end
+
+ah0                             = gca;
+axes( 'position', [ 0.5 0.95 0.01 0.01 ] );
+axis off;
+th                              = text( 0.5, 0.5, str, 'Fontsize', 12 );
+set( th, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle' )
+subplot( ah0 );
+
+return % local_fig_title
+
 
 % EOF
