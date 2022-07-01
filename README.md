@@ -73,4 +73,6 @@ framework facilitates the investigation of resonance in neuronal systems.
 - sortranges                       
   - to be a set of non-overlapping [ small large ] pairs
 
- 
+ ### To run the code
+- Download all routines.
+- In MATLAB, write NR_make_Fig#, where # is the number of the figure to be simulated and plotted.
