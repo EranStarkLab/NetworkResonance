@@ -289,6 +289,7 @@ if reCompute
     L.Iapp                      = Iapp;
     L.Ain                       = Ain;
     L.D_i                       = D_i;
+    L.t                         = t;
 end
 
 % parameters for coherence and firing rate calculations:
