@@ -41,7 +41,7 @@ datadir                         = outdir;
 % (A-B) Gamma INT - subthreshold and spiking
 % ----------------------------------------------------------------------
 
-fig8                            = [];
+fig8A                           = zeros( 7, 1 );
 
 % parameters for coherence and firing rate calculations:
 aFs                             = 1250;                                     % st_coherence
@@ -61,10 +61,10 @@ dflag                           = '';
 % subthreshold gamma resonance in the INT
 MDL                             = 7;
 MDL_params                      = [ 0.5 3.8 0 0 ];                          % [ Ain, Iapp, Gie (i to e...) D_i ]
-[ t, ~, Vi_1, Ie ]              = NR_eisim( { MDL, MDL_params });
+[ t, ~, Vi_1, ~, Ie ]           = NR_eisim( { MDL, MDL_params });
 Fs                              = 1 / diff( t( 1 : 2 ) ) * 1000;
 
-fig8( 1 )                       = figure;
+fig8A( 1 )                      = figure;
 subplot( 2, 1, 1 )
 plot( t / 10000 * 80, Vi_1, 'b' ); 
 hold on
@@ -124,7 +124,7 @@ MDL_params                      = [ 0.9 3.8 0 0.1 ];
 [ t, ~, Vi_1, ~, Ie ]           = NR_eisim( { MDL, MDL_params } );
 
 % plot raw:
-fig8( 2 )                       = figure;
+fig8A( 2 )                      = figure;
 subplot( 2, 1, 1 )
 plot( t / 10000 * 80, Vi_1, 'b' ); 
 hold on
@@ -153,10 +153,10 @@ s.phs                           = phsI;
     , 'fROI', fROI, 'Fs', aFs2, 'graphics', graphics1, 'M', M, 'nFFT', nFFT );
 s.frate_vec                     = frateI;
 s.fbins                         = fbinsI;
-fig8( 3 )                       = gcf;
+fig8A( 3 )                      = gcf;
 
 % firing rate and coherence
-figure( fig8( 2 ) )
+figure( fig8A( 2 ) )
 subplot( 2, 3, 4 ) % firing rate
 ph                              = plot( s.fbins, s.frate_vec, '.-b' );
 set( ph, 'color', color_output )
@@ -185,7 +185,7 @@ MDL_params                      = [ 2.0 3.8 0 0.1 ];
 [ t, ~, Vi_1, ~, Ie ]           = NR_eisim( { MDL, MDL_params } );
 
 % plot raw:
-fig8( 4 )                       = figure;
+fig8A( 4 )                      = figure;
 subplot( 2, 1, 1 )
 plot( t / 10000 * 80, Vi_1, 'b' ); 
 hold on
@@ -215,10 +215,10 @@ s.phs                           = phsI;
     , 'fROI', fROI, 'Fs', aFs2, 'graphics', graphics1, 'M', M, 'nFFT', nFFT );
 s.frate_vec                     = frateI;
 s.fbins                         = fbinsI;
-fig8( 5 )                       = gcf;
+fig8A( 5 )                      = gcf;
 
 % firing rate and coherence
-figure( fig8( 4 ) )
+figure( fig8A( 4 ) )
 subplot( 2, 3, 4 ) % firing rate
 ph                              = plot( s.fbins, s.frate_vec, '.-b' );
 set( ph, 'color', color_output )
@@ -254,7 +254,7 @@ D_i                             = 0.1;
 nreps                           = 40;
 
 % load or simply recompute (spikes only)
-filename                        = sprintf( '%s/NR_eisim_MDL%d_%d_reps.mat', datadir, MDL, nreps );
+filename                        = sprintf( '%s/NR_fig8_eisim_MDL%d_%d_reps.mat', datadir, MDL, nreps );
 if ~reCompute
     try
         L                       = load( filename, '-mat' );
@@ -322,34 +322,32 @@ fidx                            = fo >= fROI( 1 ) & fo <= fROI( 2 );        % ba
 cohs                            = cohs( fidx, : );
 
 % plot this summary:
-fig8( 5 )                       = NR_sinusoids_to_cmodel_images( cohs ...
+fig8A( 6 )                      = NR_sinusoids_to_cmodel_images( cohs ...
     , fo( fidx ), fROI, Ain, 'frates', frates ...
     , 'fbins', fbinsI, 'Vcan', 0.9 );
 
 % simulate subthreshold (noiselesss) and compute impedances
-if true
-    Ain_sth                     = 0.05 : 0.05 : 0.7;
-    nAin_sth                    = length( Ain_sth );
-    zmat                        = NaN( nc, nAin_sth );
-    phsZ                        = NaN( nc, nAin_sth );
-    D_i_sth                     = 0;
-    
-    for i                       = 1 : nAin_sth
-        fprintf( 1, 'MDL%d: Ain=%0.3g\n', MDL, Ain_sth( i ) )
-        [ t, ~, Vi_1 ...
-            , ~, finput_i ]     = NR_eisim( { MDL, [ Ain_sth( i ), Iapp NaN D_i_sth ] } );
-        [ zI, phsI ]            = NR_calc_z_spectral( finput_i( : ), Vi_1( : ), 'xFs', Fs ...
-            , 'fROI', fROI, 'Fs', aFs, 'graphics', graphics0, 'M', M, 'mtNW', mtNW );
-        zmat( :, i )            = zI;
-        phsZ( :, i )            = phsI;
-    end
-    
-    fig8( 6 )                   = NR_sinusoids_to_cmodel_images( zmat( fidx, : ) ...
-        , fo( fidx ), fROI, Ain_sth, 'output', 'subthreshold', 'Vcan', 0.5 );
+Ain_sth                         = 0.05 : 0.05 : 0.7;
+nAin_sth                        = length( Ain_sth );
+zmat                            = NaN( nc, nAin_sth );
+phsZ                            = NaN( nc, nAin_sth );
+D_i_sth                         = 0;
+
+for i                           = 1 : nAin_sth
+    fprintf( 1, 'MDL%d: Ain=%0.3g\n', MDL, Ain_sth( i ) )
+    [ t, ~, Vi_1 ...
+        , ~, finput_i ]         = NR_eisim( { MDL, [ Ain_sth( i ), Iapp NaN D_i_sth ] } );
+    [ zI, phsI ]                = NR_calc_z_spectral( finput_i( : ), Vi_1( : ), 'xFs', Fs ...
+        , 'fROI', fROI, 'Fs', aFs, 'graphics', graphics0, 'M', M, 'mtNW', mtNW );
+    zmat( :, i )                = zI;
+    phsZ( :, i )                = phsI;
 end
 
+fig8A( 7 )                      = NR_sinusoids_to_cmodel_images( zmat( fidx, : ) ...
+    , fo( fidx ), fROI, Ain_sth, 'output', 'subthreshold', 'Vcan', 0.5 );
+
 %-----
-fig                             = fig8( fig8 ~= 0 );
+fig                             = fig8A( fig8A ~= 0 );
 if savef
     for i                       = 1 : length( fig )
         figname                 = [ outdir filesep prefix '_FIG8AB_part' num2str( i ) ];
@@ -390,8 +388,7 @@ MDLs                            = [ 5 4 6 ];                                % E,
 % parameters for simulations:
 k                               = 0;
 nreps                           = 20;
-IhFlag                          = 1;
-filename                        = sprintf( '%s/NR_eisim_%d_reps_Ih%d.mat', datadir, nreps, IhFlag );
+filename                        = sprintf( '%s/NR_fig7_eisim_%d_reps.mat', datadir, nreps );
 MDL4_params                     = { 4, [ 0.5 -0.5 0.4 0.1 0.1 ] }; % [ Ain, Iapp, Gie (i to e...) D_i D_e ]
 MDL5_params                     = { 5, [ 0.2 -2.7 NaN 0.1 0.1 ] };
 MDL6_params                     = { 6, [ 2.1  3.7 0.4 0.1 0.1 ] };
@@ -412,17 +409,14 @@ if reCompute
     all_t                       = cell( length( MDLs ), 1 );
 end
 
+fig8                            = zeros( 4, length( MDLs ) );
+
 % network resonance with chirps
 for i                           = 1 : length( MDLs )
     
     st_e                        = cell( 1, nreps );
     st_i                        = cell( 1, nreps );
     for j                       = 1 : nreps
-        if j == 1
-            graphics            = 1;
-        else
-            graphics            = 0;
-        end
         if reCompute || j == 1
             
             if MDLs( i ) == 4
@@ -445,7 +439,6 @@ for i                           = 1 : length( MDLs )
                 st_i{ j }       = round( mean( stimes, 2 ) );
             end
             
-            
             if MDLs( i ) == 5
                 finput          = finput_e;
             else
@@ -455,7 +448,6 @@ for i                           = 1 : length( MDLs )
         end
         if j == 1
             k                   = k + 1;
-            fig8( 1, k )        = gcf;
         end
     end
     if ~reCompute
@@ -473,11 +465,11 @@ for i                           = 1 : length( MDLs )
         if rc == 0
             st                  = st_i;
             tpstr               = 'I-cell';
-            rn                  = 4;
+            rn                  = 1;
         elseif rc == 1
             st                  = st_e;
             tpstr               = 'E-cell';
-            rn                  = 2;
+            rn                  = 3;
         end
         
         fig8( rn, k )           = figure;
@@ -545,6 +537,7 @@ for i                           = 1 : length( MDLs )
     end
     
 end
+
 if reCompute
     save( filename, 'all_st_e', 'all_st_i', 'all_finput', 'all_t' );
 end    

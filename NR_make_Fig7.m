@@ -15,7 +15,6 @@
 % last update
 % 01-jul-22 AL
 
-
 function NR_make_Fig7( savef, pstr, outdir )
 
 % constants
@@ -23,7 +22,6 @@ prefix                          = 'resonance_network';
 renderer_name                   = 'painters';
 resize                          = '-bestfit';
 color_output                    = [ 0 0 0 ];                                % output (Vm/spikes): black 
-
 
 % arguments
 nargs = nargin;
@@ -43,8 +41,6 @@ datadir                         = outdir;
 % (A-B) Network resonance (E,IE,IE-gamma) with chirps (single trial + 20 rasters for each)
 % ----------------------------------------------------------------------
 
-fig7                            = [];
-
 % parameters for coherence and firing rate calculations:
 aFs                             = 1250;                                     % st_coherence
 aFs2                            = 5000;                                     % st_fingerprint
@@ -63,8 +59,7 @@ MDLs                            = [ 5 4 6 ];                                % E,
 % parameters for simulations:
 k                               = 0;
 nreps                           = 20;
-IhFlag                          = 1;
-filename                        = sprintf( '%s/NR_eisim_%d_reps_Ih%d.mat', datadir, nreps, IhFlag );
+filename                        = sprintf( '%s/NR_fig7_eisim_%d_reps.mat', datadir, nreps );
 MDL4_params                     = { 4, [ 0.5 -0.5 0.4 0.1 0.1 ] }; % [ Ain, Iapp, Gie (i to e...) D_i D_e ]
 MDL5_params                     = { 5, [ 0.2 -2.7 NaN 0.1 0.1 ] };
 MDL6_params                     = { 6, [ 2.1  3.7 0.4 0.1 0.1 ] };
@@ -84,6 +79,8 @@ if reCompute
     all_finput                  = cell( length( MDLs ), 1 );
     all_t                       = cell( length( MDLs ), 1 );
 end
+
+fig7                            = zeros( 4, length( MDLs ) );
 
 % network resonance with chirps
 for i                           = 1 : length( MDLs )
@@ -122,7 +119,6 @@ for i                           = 1 : length( MDLs )
         end
         if j == 1
             k                   = k + 1;
-            fig7( 1, k )        = gcf;
         end
     end
     if ~reCompute
@@ -140,11 +136,11 @@ for i                           = 1 : length( MDLs )
         if rc == 0
             st                  = st_i;
             tpstr               = 'I-cell';
-            rn                  = 4;
+            rn                  = 1;
         elseif rc == 1
             st                  = st_e;
             tpstr               = 'E-cell';
-            rn                  = 2;
+            rn                  = 3;
         end
         
         fig7( rn, k )           = figure;
